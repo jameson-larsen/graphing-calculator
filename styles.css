@@ -55,7 +55,6 @@ body {
 }
 #functions-container form div input {
     height:30px;
-    border-radius:5px;
     border:1px solid black;
     font-size:18px;
 }
