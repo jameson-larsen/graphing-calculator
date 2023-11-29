@@ -2,11 +2,38 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap" rel="stylesheet">
     <link href="./styles.css" rel="stylesheet">
     <title>Graphing Calculator</title>
   </head>
   <body>
-    <div id="container">
+    <div id="functions-container">
+      <form>
+        <div>
+          <label for="fx1">f<sub>1</sub>(x)</label>
+          <input class="function-input" type="text" id="fx1">
+        </div>
+        <div>
+          <label for="fx2">f<sub>2</sub>(x)</label>
+          <input class="function-input" type="text" id="fx2">
+        </div>
+        <div>
+          <label for="fx3">f<sub>3</sub>(x)</label>
+          <input class="function-input" type="text" id="fx3">
+        </div>
+        <div>
+          <label for="fx4">f<sub>4</sub>(x)</label>
+          <input class="function-input" type="text" id="fx4">
+        </div>
+        <div>
+          <label for="fx5">f<sub>5</sub>(x)</label>
+          <input class="function-input" type="text" id="fx5">
+        </div>
+      </form>
+    </div>
+    <div id="canvas-container">
       <canvas id="canvas" width="720" height="720"></canvas>
       <div id="zoom-container">
         <button id="zoom-in">+</button>

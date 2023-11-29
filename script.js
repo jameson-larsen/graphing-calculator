@@ -1,6 +1,6 @@
 import init, { run, initialize, reset } from "./pkg/graphing_calculator.js";
 init().then(() => {
-  initialize(["log(x)"]);
+  initialize([]);
   run(-5.0, 5.0, -5.0, 5.0);
   let currentView = [-5.0, 5.0, -5.0, 5.0];
   let dragging = false;
@@ -87,4 +87,18 @@ init().then(() => {
     adjustButtonStyles();
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
   })
+  let inputs = document.getElementsByClassName("function-input");
+  for(let el of inputs) {
+    el.addEventListener("keyup", () => {
+        let functions = [];
+        for(let el of inputs) {
+            if(el.value !== "") {
+                functions.push(el.value);
+            }
+        }
+        reset();
+        initialize(functions);
+        run(currentView[0], currentView[1], currentView[2], currentView[3]);
+    })
+  }
 });

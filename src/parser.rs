@@ -82,6 +82,11 @@ fn parse_term(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usi
         let right_unwrapped = right.unwrap();
         let right = right_unwrapped.0;
         next = right_unwrapped.1;
+        if operator == TokenType::Div {
+            if let ASTNodeType::AtomicExpression(TokenType::NumLiteral(num)) = right {
+                if num == 0.0 { return Err(String::from("Error: attempted division by 0")); }
+            }
+        }
         left = ASTNodeType::BinaryExpression(operator, Box::new(left), Box::new(right));
     }
 
