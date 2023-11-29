@@ -10,11 +10,10 @@ mod scanner;
 mod parser;
 mod calculator;
 mod graph;
-
 struct AppState {
     calculators: RefCell<Vec<Calculator>>,
     context: Option<CanvasRenderingContext2d>,
-    canvas: Option<HtmlCanvasElement>
+    canvas: Option<HtmlCanvasElement>,
 }
 
 thread_local! {
@@ -40,14 +39,15 @@ pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
 pub fn reset() {
     APP_STATE.with(|state| {
         let mut s = state.borrow_mut();
-        s.calculators.borrow_mut().clear();
-        s.context.take();
         s.canvas.take();
+        s.context.take();
+        s.calculators.borrow_mut().clear();
     });
 }
 
+//sets up Calculator structs for each function to graph, returns true if successful
 #[wasm_bindgen]
-pub fn initialize(expressions: JsValue) {
+pub fn initialize(expressions: JsValue) -> bool {
     APP_STATE.with(|state| {
         let mut s = state.borrow_mut();
         let expressions: Vec<String> = serde_wasm_bindgen::from_value(expressions).unwrap();
@@ -55,13 +55,13 @@ pub fn initialize(expressions: JsValue) {
             let tokens = scan(expression);
             if let Err(e) = tokens { 
                 web_sys::console::log_1(&e.into());
-                return;
+                return false;
             }
             let tokens = tokens.unwrap();
             let ast = parse(&tokens);
             if let Err(e) = ast {
                 web_sys::console::log_1(&e.into());
-                return;
+                return false;
             }
             let ast = ast.unwrap();
             let calculator = generate_calculator(ast, DELTA * 0.5);
@@ -70,6 +70,7 @@ pub fn initialize(expressions: JsValue) {
         let (canvas, context) = initialize_canvas();
         s.canvas.replace(canvas);
         s.context.replace(context);
+        true
     })
 }
 

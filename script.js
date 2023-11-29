@@ -97,8 +97,9 @@ init().then(() => {
             }
         }
         reset();
-        initialize(functions);
-        run(currentView[0], currentView[1], currentView[2], currentView[3]);
+        if(initialize(functions)) {
+            run(currentView[0], currentView[1], currentView[2], currentView[3]);
+        }
     })
   }
 });
