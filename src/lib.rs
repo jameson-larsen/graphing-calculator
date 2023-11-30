@@ -21,7 +21,8 @@ thread_local! {
     static APP_STATE : RefCell<AppState> = RefCell::new(AppState { calculators: RefCell::new(Vec::new()), context: None, canvas: None, cache: RefCell::new(Vec::new()) });
 }
 
-const DELTA : f64 = 0.002;
+//2^-8
+const DELTA : f64 = 0.00390625;
 const MAX_CACHE_SIZE : usize = 100000;
 
 #[wasm_bindgen]
@@ -84,10 +85,11 @@ pub fn expand_cache() {
         let s = state.borrow();
         let mut cache = s.cache.borrow_mut();
         let mut calculators = s.calculators.borrow_mut();
-        if cache.len() > 0 && cache[0].len() > 0 && cache[0].len() < MAX_CACHE_SIZE {
-            let cache_start = cache[0][0].0;
-            let cache_end = cache[0][cache[0].len() - 1].0;
+        if cache.len() > 0 {
             for (i, calculator) in calculators.iter_mut().enumerate() {
+                if cache[i].len() == 0 || cache[i].len() >= MAX_CACHE_SIZE { continue; }
+                let cache_start = cache[i][0].0;
+                let cache_end = cache[i][cache[i].len() - 1].0;
                 let mut prepend = Vec::new();
                 let mut append = Vec::new();
                 for j in (1..=((1.0 / DELTA) as usize)).rev() {
@@ -112,22 +114,14 @@ fn graph_each_function(context: &CanvasRenderingContext2d, x_start: f64, x_end: 
     APP_STATE.with(|state| {
         let s = state.borrow();
         let mut cache = s.cache.borrow_mut();
-        if cache.len() > 0 && cache[0].len() > 0 && cache[0][0].0 <= x_start && cache[0][cache[0].len() - 1].0 >= x_end {
-            for i in 0..s.calculators.borrow().len() {
+        for (i, calculator) in s.calculators.borrow_mut().iter_mut().enumerate() {
+            if cache.len() > i && cache[i].len() > 0 && cache[i][0].0 <= x_start && cache[i][cache[i].len() - 1].0 >= x_end {
                 draw_function_graph_from_cache(context, &cache[i], x_start, x_end, y_start, y_end, DELTA, i)
             }
-        }
-        else {
-            invalidate_cache(&mut cache);
-            for (i, calculator) in s.calculators.borrow_mut().iter_mut().enumerate() {
+            else {
+                if cache.len() > i { cache[i].clear(); }
                 draw_function_graph(context, calculator, &mut cache[i], x_start, x_end, y_start, y_end, DELTA, i);
             }
         }
     })   
-}
-
-fn invalidate_cache(cache: &mut Vec<Vec<(f64, Option<f64>)>>) {
-    for v in cache.iter_mut() {
-        v.clear();
-    }
 }
