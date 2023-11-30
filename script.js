@@ -14,6 +14,7 @@ init().then(() => {
     y = e.offsetY / (canvas.width / (currentView[3] - currentView[2]));
     dragging = true;
     clearInterval(interval2);
+    interval2 = null;
     interval = setInterval(() => {
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
     }, 33);
@@ -35,12 +36,16 @@ init().then(() => {
   canvas.addEventListener("mouseup", () =>  {
     dragging = false;
     clearInterval(interval);
-    interval2 = setInterval(() => { expand_cache(); }, 5);
+    if(!interval2) {
+      interval2 = setInterval(() => { expand_cache(); }, 5);
+    }
   })
   canvas.addEventListener("mouseleave", () => {
     dragging = false;
     clearInterval(interval);
-    interval2 = setInterval(() => { expand_cache(); }, 5);
+    if(!interval2) {
+        interval2 = setInterval(() => { expand_cache(); }, 5);
+    }
   })
   let zoomIn = document.getElementById("zoom-in");
   let zoomOut = document.getElementById("zoom-out");
@@ -75,8 +80,11 @@ init().then(() => {
     currentView[2] = currentCenterY - currentViewRange;
     currentView[3] = currentCenterY + currentViewRange;
     adjustButtonStyles();
+    clearInterval(interval);
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
-    interval2 = setInterval(() => { expand_cache(); }, 5);
+    if(!interval2) {
+        interval2 = setInterval(() => { expand_cache(); }, 5);
+    }
   })
   zoomIn.addEventListener("click", () => {
     let currentViewRange = currentView[1] - currentView[0];
@@ -90,8 +98,11 @@ init().then(() => {
     currentView[2] = currentCenterY - currentViewRange / 4;
     currentView[3] = currentCenterY + currentViewRange / 4;
     adjustButtonStyles();
+    clearInterval(interval);
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
-    interval2 = setInterval(() => { expand_cache(); }, 5);
+    if(!interval2) {
+        interval2 = setInterval(() => { expand_cache(); }, 5);
+    }
   })
   let inputs = document.getElementsByClassName("function-input");
   for(let el of inputs) {
@@ -104,10 +115,11 @@ init().then(() => {
         }
         reset();
         if(initialize(functions)) {
+            clearInterval(interval);
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
-            interval2 = setInterval(() => { 
-                expand_cache(); 
-            }, 5);
+            if(!interval2) {
+                interval2 = setInterval(() => { expand_cache(); }, 5);
+            }
         }
     })
   }
