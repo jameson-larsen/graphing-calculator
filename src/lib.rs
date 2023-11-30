@@ -22,7 +22,7 @@ thread_local! {
 }
 
 const DELTA : f64 = 0.002;
-const MAX_CACHE_SIZE : usize = 50000;
+const MAX_CACHE_SIZE : usize = 100000;
 
 #[wasm_bindgen]
 pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
@@ -90,7 +90,7 @@ pub fn expand_cache() {
             for (i, calculator) in calculators.iter_mut().enumerate() {
                 let mut prepend = Vec::new();
                 let mut append = Vec::new();
-                for j in ((1.0 / DELTA) as usize)..=1 {
+                for j in (1..=((1.0 / DELTA) as usize)).rev() {
                     let x = cache_start - DELTA * j as f64;
                     let y = calculator.calculate(x);
                     prepend.push((x,y));
