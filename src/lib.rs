@@ -22,7 +22,7 @@ thread_local! {
 }
 
 const DELTA : f64 = 0.002;
-const MAX_CACHE_SIZE : usize = 150000;
+const MAX_CACHE_SIZE : usize = 50000;
 
 #[wasm_bindgen]
 pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {

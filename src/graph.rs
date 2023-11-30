@@ -139,7 +139,7 @@ pub fn draw_function_graph_from_cache(rendering_context: &CanvasRenderingContext
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
     let line_size: f64 = 3e-3 * (x_end - x_start) as f64;
     rendering_context.set_line_width(line_size);
-    let result = cache.binary_search_by(|point| points_comparator(point.0, x_start, step_size));
+    let result = cache.binary_search_by(|point| points_comparator(point.0, x_start, step_size * 2.0));
     let mut i;
     match result {
         Ok(idx) => { i = idx; },
