@@ -1,6 +1,7 @@
 use web_sys::CanvasRenderingContext2d;
 use crate::calculator::Calculator;
 use wasm_bindgen::JsCast;
+use std::cmp::Ordering;
 
 const COLORS : &[& str] = &["red", "green", "blue", "purple"];
 
@@ -62,7 +63,7 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
 }
 
 
-pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calculator: &mut Calculator, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
+pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calculator: &mut Calculator, cache: &mut Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
     let line_size: f64 = 3e-3 * (x_end - x_start) as f64;
     rendering_context.set_line_width(line_size);
@@ -88,6 +89,7 @@ pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calcula
     let mut path_open = false;
     while x <= x_end {
         y = calculator.calculate(x);
+        cache.push((x, y));
         match y {
             Some(val) => {
                 if val < y_start || val > y_end {
@@ -131,4 +133,91 @@ pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calcula
         rendering_context.stroke();
         rendering_context.close_path();
     }
+}
+
+pub fn draw_function_graph_from_cache(rendering_context: &CanvasRenderingContext2d, cache: &Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
+    rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
+    let line_size: f64 = 3e-3 * (x_end - x_start) as f64;
+    rendering_context.set_line_width(line_size);
+    let result = cache.binary_search_by(|point| points_comparator(point.0, x_start, step_size));
+    let mut i;
+    match result {
+        Ok(idx) => { i = idx; },
+        Err(_) => { web_sys::console::log_1(&"cache failed".into()); return; }
+    }
+    let mut x = cache[i].0;
+    let mut y;
+    //find first point that is within our graph area
+    while x <= x_end && i + 1 < cache.len() {
+        let next_y = cache[i + 1].1;
+        if next_y == None {
+            i += 1;
+            x = cache[i].0;
+            continue;
+        }
+        if let Some(num) = next_y {
+            if num < y_start || num > y_end {
+                i += 1;
+                x = cache[i].0;
+                continue;
+            }
+            else {
+                break; 
+            }
+        }
+    }
+    let mut path_open = false;
+    while x <= x_end && i + 1 < cache.len() {
+        y = cache[i].1;
+        match y {
+            Some(val) => {
+                if val < y_start || val > y_end {
+                    if path_open {
+                        rendering_context.line_to(x, val);
+                        rendering_context.stroke();
+                        rendering_context.close_path();
+                        path_open = false;
+                    }
+                    else {
+                        let next_y = cache[i + 1].1;
+                        if let Some(next_val) = next_y {
+                            if next_val > y_start && next_val < y_end {
+                                rendering_context.begin_path();
+                                path_open = true;
+                                rendering_context.move_to(x, val);
+                            }
+                        }
+                    }
+                }
+                else {
+                    if !path_open {
+                        rendering_context.begin_path();
+                        path_open = true;
+                        rendering_context.move_to(x, val);
+                    }
+                    else { rendering_context.line_to(x, val); }
+                }
+            },
+            None => {
+                if path_open {
+                    rendering_context.stroke();
+                    rendering_context.close_path();
+                    path_open = false;
+                }
+            }
+        }
+        i += 1;
+        x = cache[i].0;
+    }
+    if path_open {
+        rendering_context.stroke();
+        rendering_context.close_path();
+    }
+}
+
+fn points_comparator(f1: f64, f2: f64, tolerance: f64) -> Ordering {
+    let val = f1 - f2;
+    if val.abs() <= tolerance { return Ordering::Equal; }
+    else if val < 0.0 { return Ordering::Less; }
+    Ordering::Greater
 }

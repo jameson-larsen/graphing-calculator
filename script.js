@@ -1,4 +1,4 @@
-import init, { run, initialize, reset } from "./pkg/graphing_calculator.js";
+import init, { run, initialize, reset, expand_cache } from "./pkg/graphing_calculator.js";
 init().then(() => {
   initialize([]);
   run(-5.0, 5.0, -5.0, 5.0);
@@ -8,10 +8,12 @@ init().then(() => {
   let y = 0;
   const canvas = document.getElementById("canvas");
   let interval;
+  let interval2;
   canvas.addEventListener("mousedown", (e) => {
     x = e.offsetX / (canvas.width / (currentView[1] - currentView[0]));
     y = e.offsetY / (canvas.width / (currentView[3] - currentView[2]));
     dragging = true;
+    clearInterval(interval2);
     interval = setInterval(() => {
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
     }, 33);
@@ -33,10 +35,12 @@ init().then(() => {
   canvas.addEventListener("mouseup", () =>  {
     dragging = false;
     clearInterval(interval);
+    interval2 = setInterval(() => { expand_cache(); }, 5);
   })
   canvas.addEventListener("mouseleave", () => {
     dragging = false;
     clearInterval(interval);
+    interval2 = setInterval(() => { expand_cache(); }, 5);
   })
   let zoomIn = document.getElementById("zoom-in");
   let zoomOut = document.getElementById("zoom-out");
@@ -72,6 +76,7 @@ init().then(() => {
     currentView[3] = currentCenterY + currentViewRange;
     adjustButtonStyles();
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
+    interval2 = setInterval(() => { expand_cache(); }, 5);
   })
   zoomIn.addEventListener("click", () => {
     let currentViewRange = currentView[1] - currentView[0];
@@ -86,6 +91,7 @@ init().then(() => {
     currentView[3] = currentCenterY + currentViewRange / 4;
     adjustButtonStyles();
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
+    interval2 = setInterval(() => { expand_cache(); }, 5);
   })
   let inputs = document.getElementsByClassName("function-input");
   for(let el of inputs) {
@@ -99,6 +105,7 @@ init().then(() => {
         reset();
         if(initialize(functions)) {
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
+            interval2 = setInterval(() => { expand_cache(); }, 5);
         }
     })
   }

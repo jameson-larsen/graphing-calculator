@@ -14,13 +14,15 @@ struct AppState {
     calculators: RefCell<Vec<Calculator>>,
     context: Option<CanvasRenderingContext2d>,
     canvas: Option<HtmlCanvasElement>,
+    cache: RefCell<Vec<Vec<(f64, Option<f64>)>>>
 }
 
 thread_local! {
-    static APP_STATE : RefCell<AppState> = RefCell::new(AppState { calculators: RefCell::new(Vec::new()), context: None, canvas: None });
+    static APP_STATE : RefCell<AppState> = RefCell::new(AppState { calculators: RefCell::new(Vec::new()), context: None, canvas: None, cache: RefCell::new(Vec::new()) });
 }
 
 const DELTA : f64 = 0.002;
+const MAX_CACHE_SIZE : usize = 150000;
 
 #[wasm_bindgen]
 pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
@@ -42,6 +44,7 @@ pub fn reset() {
         s.canvas.take();
         s.context.take();
         s.calculators.borrow_mut().clear();
+        s.cache.borrow_mut().clear();
     });
 }
 
@@ -66,6 +69,7 @@ pub fn initialize(expressions: JsValue) -> bool {
             let ast = ast.unwrap();
             let calculator = generate_calculator(ast, DELTA * 0.5);
             s.calculators.borrow_mut().push(calculator);
+            s.cache.borrow_mut().push(Vec::new());
         }
         let (canvas, context) = initialize_canvas();
         s.canvas.replace(canvas);
@@ -74,11 +78,56 @@ pub fn initialize(expressions: JsValue) -> bool {
     })
 }
 
+#[wasm_bindgen]
+pub fn expand_cache() {
+    APP_STATE.with(|state| {
+        let s = state.borrow();
+        let mut cache = s.cache.borrow_mut();
+        let mut calculators = s.calculators.borrow_mut();
+        if cache.len() > 0 && cache[0].len() > 0 && cache[0].len() < MAX_CACHE_SIZE {
+            let cache_start = cache[0][0].0;
+            let cache_end = cache[0][cache[0].len() - 1].0;
+            for (i, calculator) in calculators.iter_mut().enumerate() {
+                let mut prepend = Vec::new();
+                let mut append = Vec::new();
+                for j in ((1.0 / DELTA) as usize)..=1 {
+                    let x = cache_start - DELTA * j as f64;
+                    let y = calculator.calculate(x);
+                    prepend.push((x,y));
+                }
+                for j in 1..=((1.0 / DELTA) as usize) {
+                    let x = cache_end + DELTA * j as f64;
+                    let y = calculator.calculate(x);
+                    append.push((x,y));
+                }
+                prepend.append(&mut cache[i]);
+                prepend.append(&mut append);
+                cache[i] = prepend;
+            }
+        }
+    })
+}
+
 fn graph_each_function(context: &CanvasRenderingContext2d, x_start: f64, x_end: f64, y_start: f64, y_end: f64)  {
     APP_STATE.with(|state| {
         let s = state.borrow();
-        for (i, calculator) in s.calculators.borrow_mut().iter_mut().enumerate() {
-            draw_function_graph(context, calculator, x_start, x_end, y_start, y_end, DELTA, i);
+        let mut cache = s.cache.borrow_mut();
+        if cache.len() > 0 && cache[0].len() > 0 && cache[0][0].0 <= x_start && cache[0][cache[0].len() - 1].0 >= x_end {
+            for i in 0..s.calculators.borrow().len() {
+                draw_function_graph_from_cache(context, &cache[i], x_start, x_end, y_start, y_end, DELTA, i)
+            }
+        }
+        else {
+            invalidate_cache(&mut cache);
+            for (i, calculator) in s.calculators.borrow_mut().iter_mut().enumerate() {
+                draw_function_graph(context, calculator, &mut cache[i], x_start, x_end, y_start, y_end, DELTA, i);
+            }
         }
     })   
+}
+
+fn invalidate_cache(cache: &mut Vec<Vec<(f64, Option<f64>)>>) {
+    for v in cache.iter_mut() {
+        v.clear();
+    }
 }
