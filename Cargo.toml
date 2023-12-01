@@ -1,10 +1,10 @@
 [package]
 name = "graphing_calculator"
 version = "0.1.0"
-authors = ["Jameson Larsen jamesonlarsen@utah.gov"]
+authors = ["Jameson Larsen larsenjameson@gmail.com"]
 description = "A simple web graphing calculator using wasm"
 license = "MIT/Apache-2.0"
-repository = "https://github.com/yourgithubusername/hello-wasm"
+repository = "https://github.com/jameson-larsen/graphing-calculator"
 edition = "2018"
 
 [lib]
@@ -26,4 +26,16 @@ features = [
   'Window',
   'console'
 ]
+
+[profile.release]
+lto = true
+opt-level = 3
+
+[package.metadata.wasm-pack.profile.release.wasm-bindgen]
+debug-js-glue = false
+demangle-name-section = true
+dwarf-debug-info = false
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ['-O4']
 
