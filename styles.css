@@ -63,3 +63,8 @@ body {
     font-style:italic;
     margin-right:10px;
 }
+.function-input.error, .function-input.error:focus {
+    border:1px solid red !important;
+    outline:none;
+}
+

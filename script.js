@@ -105,7 +105,8 @@ init().then(() => {
     }
   })
   let inputs = document.getElementsByClassName("function-input");
-  for(let el of inputs) {
+  for(let i = 0; i < inputs.length; ++i) {
+    let el = inputs[i];
     el.addEventListener("keyup", () => {
         clearInterval(interval);
         let functions = [];
@@ -115,10 +116,19 @@ init().then(() => {
             }
         }
         reset();
-        if(initialize(functions)) {
+        let result = initialize(functions);
+        if(result.every(el => el)) {
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
             if(!interval2) {
                 interval2 = setInterval(() => { expand_cache(); }, 33);
+            }
+            el.className="function-input";
+        }
+        else {
+            for(let r of result) {
+                if(!r && el.value !== "") {
+                    el.className = "function-input error";
+                }
             }
         }
     })

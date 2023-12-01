@@ -51,31 +51,33 @@ pub fn reset() {
 
 //sets up Calculator structs for each function to graph, returns true if successful
 #[wasm_bindgen]
-pub fn initialize(expressions: JsValue) -> bool {
+pub fn initialize(expressions: JsValue) -> JsValue {
     APP_STATE.with(|state| {
+        let mut result = Vec::new();
         let mut s = state.borrow_mut();
         let expressions: Vec<String> = serde_wasm_bindgen::from_value(expressions).unwrap();
         for expression in expressions.iter() {
             let tokens = scan(expression);
-            if let Err(e) = tokens { 
-                web_sys::console::log_1(&e.into());
-                return false;
+            if let Err(_e) = tokens { 
+                result.push(false);
+                continue;
             }
             let tokens = tokens.unwrap();
             let ast = parse(&tokens);
-            if let Err(e) = ast {
-                web_sys::console::log_1(&e.into());
-                return false;
+            if let Err(_e) = ast {
+                result.push(false);
+                continue;
             }
             let ast = ast.unwrap();
             let calculator = generate_calculator(ast, DELTA * 0.5);
             s.calculators.borrow_mut().push(calculator);
             s.cache.borrow_mut().push(Vec::new());
+            result.push(true);
         }
         let (canvas, context) = initialize_canvas();
         s.canvas.replace(canvas);
         s.context.replace(context);
-        true
+        serde_wasm_bindgen::to_value(&result).unwrap()
     })
 }
 
