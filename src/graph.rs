@@ -41,13 +41,13 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
     let end = x_end.ceil() as i32;
     let line_size: f64 = 1e-3 * (end - start) as f64;
     let main_axis_size = 3e-3 * (end - start) as f64;
+    rendering_context.begin_path();
     for i in (start..end).step_by(step_size) {
         rendering_context.begin_path();
         if i == 0 { rendering_context.set_line_width(main_axis_size); } else { rendering_context.set_line_width(line_size); }
         rendering_context.move_to(i as f64, y_start);
         rendering_context.line_to(i as f64, y_end);
         rendering_context.stroke();
-        rendering_context.close_path();
     }
     let start = (y_start + 1.0).floor() as i32;
     let end = y_end.ceil() as i32;
@@ -57,7 +57,6 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
         rendering_context.move_to(x_start, i as f64);
         rendering_context.line_to(x_end, i as f64);
         rendering_context.stroke();
-        rendering_context.close_path();
     }
 }
 
