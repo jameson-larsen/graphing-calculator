@@ -21,8 +21,8 @@ thread_local! {
     static APP_STATE : RefCell<AppState> = RefCell::new(AppState { calculators: RefCell::new(Vec::new()), context: None, canvas: None, cache: RefCell::new(Vec::new()) });
 }
 
-//2^-8
-const DELTA : f64 = 0.00390625;
+//2^-9
+const DELTA : f64 = 0.001953125;
 const MAX_CACHE_SIZE : usize = 100000;
 
 #[wasm_bindgen]

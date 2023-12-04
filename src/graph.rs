@@ -68,7 +68,7 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
 
 pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calculator: &mut Calculator, cache: &mut Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
-    let line_size: f64 = 3e-3 * (x_end - x_start) as f64;
+    let line_size: f64 = 3e-3 * ((x_end - x_start) / 2.0) as f64;
     rendering_context.set_line_width(line_size);
     let mut x = x_start;
     let mut y;
@@ -130,7 +130,7 @@ pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calcula
 
 pub fn draw_function_graph_from_cache(rendering_context: &CanvasRenderingContext2d, cache: &Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
-    let line_size: f64 = 3e-3 * (x_end - x_start) as f64;
+    let line_size: f64 = 3e-3 * ((x_end - x_start) / 2.0) as f64;
     rendering_context.set_line_width(line_size);
     let mut i = ((x_start - cache[0].0) / step_size).floor() as usize;
     let mut x = cache[i].0;
