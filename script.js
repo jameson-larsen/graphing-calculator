@@ -8,16 +8,23 @@ init().then(() => {
   let y = 0;
   const canvas = document.getElementById("canvas");
   let interval;
-  let interval2;
+  let keepDrawing = false;
+  let animate = () => {
+    run(currentView[0], currentView[1], currentView[2], currentView[3]);
+    if(keepDrawing) {
+        requestAnimationFrame(() => {
+            animate();
+        });
+    }
+  }
   canvas.addEventListener("mousedown", (e) => {
     x = e.offsetX / (canvas.width / (currentView[1] - currentView[0]));
     y = e.offsetY / (canvas.width / (currentView[3] - currentView[2]));
     dragging = true;
-    clearInterval(interval2);
-    interval2 = null;
-    interval = setInterval(() => {
-        run(currentView[0], currentView[1], currentView[2], currentView[3]);
-    }, 33);
+    clearInterval(interval);
+    interval = null;
+    keepDrawing = true;
+    animate();
   })
   canvas.addEventListener("mousemove", (e) => {
     if(dragging) {
@@ -35,16 +42,16 @@ init().then(() => {
   })
   canvas.addEventListener("mouseup", () =>  {
     dragging = false;
-    clearInterval(interval);
-    if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 50);
+    keepDrawing = false;
+    if(!interval) {
+        interval = setInterval(() => { expand_cache(); }, 33);
     }
   })
   canvas.addEventListener("mouseleave", () => {
     dragging = false;
-    clearInterval(interval);
-    if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 50);
+    keepDrawing = false;
+    if(!interval) {
+        interval = setInterval(() => { expand_cache(); }, 33);
     }
   })
   let zoomIn = document.getElementById("zoom-in");
@@ -80,10 +87,10 @@ init().then(() => {
     currentView[2] = currentCenterY - currentViewRange;
     currentView[3] = currentCenterY + currentViewRange;
     adjustButtonStyles();
-    clearInterval(interval);
+    keepDrawing = false;
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
-    if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 50);
+    if(!interval) {
+        interval = setInterval(() => { expand_cache(); }, 33);
     }
   })
   zoomIn.addEventListener("click", () => {
@@ -98,17 +105,17 @@ init().then(() => {
     currentView[2] = currentCenterY - currentViewRange / 4;
     currentView[3] = currentCenterY + currentViewRange / 4;
     adjustButtonStyles();
-    clearInterval(interval);
+    keepDrawing = false;
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
-    if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 50);
+    if(!interval) {
+        interval = setInterval(() => { expand_cache(); }, 33);
     }
   })
   let inputs = document.getElementsByClassName("function-input");
   for(let i = 0; i < inputs.length; ++i) {
     let el = inputs[i];
     el.addEventListener("keyup", () => {
-        clearInterval(interval);
+        keepDrawing = false;
         let functions = [];
         for(let el of inputs) {
             if(el.value !== "") {
@@ -119,8 +126,8 @@ init().then(() => {
         let result = initialize(functions);
         if(result.every(el => el)) {
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
-            if(!interval2) {
-                interval2 = setInterval(() => { expand_cache(); }, 50);
+            if(!interval) {
+                interval = setInterval(() => { expand_cache(); }, 33);
             }
             el.className="function-input";
         }
@@ -135,6 +142,6 @@ init().then(() => {
   }
   canvas.addEventListener("dragover", () => {
     dragging = false;
-    clearInterval(interval);
+    keepDrawing = false;
   })
 });
