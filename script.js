@@ -37,14 +37,14 @@ init().then(() => {
     dragging = false;
     clearInterval(interval);
     if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 33);
+        interval2 = setInterval(() => { expand_cache(); }, 50);
     }
   })
   canvas.addEventListener("mouseleave", () => {
     dragging = false;
     clearInterval(interval);
     if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 33);
+        interval2 = setInterval(() => { expand_cache(); }, 50);
     }
   })
   let zoomIn = document.getElementById("zoom-in");
@@ -83,7 +83,7 @@ init().then(() => {
     clearInterval(interval);
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
     if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 33);
+        interval2 = setInterval(() => { expand_cache(); }, 50);
     }
   })
   zoomIn.addEventListener("click", () => {
@@ -101,7 +101,7 @@ init().then(() => {
     clearInterval(interval);
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
     if(!interval2) {
-        interval2 = setInterval(() => { expand_cache(); }, 33);
+        interval2 = setInterval(() => { expand_cache(); }, 50);
     }
   })
   let inputs = document.getElementsByClassName("function-input");
@@ -120,7 +120,7 @@ init().then(() => {
         if(result.every(el => el)) {
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
             if(!interval2) {
-                interval2 = setInterval(() => { expand_cache(); }, 33);
+                interval2 = setInterval(() => { expand_cache(); }, 50);
             }
             el.className="function-input";
         }

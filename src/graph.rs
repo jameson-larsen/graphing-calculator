@@ -1,9 +1,8 @@
 use web_sys::CanvasRenderingContext2d;
 use crate::calculator::Calculator;
 use wasm_bindgen::JsCast;
-use std::cmp::Ordering;
 
-const COLORS : &[& str] = &["red", "green", "blue", "purple"];
+const COLORS : &[& str] = &["red", "green", "blue", "purple", "orange"];
 
 pub fn initialize_canvas() -> (web_sys::HtmlCanvasElement, CanvasRenderingContext2d) {
     let document = web_sys::window().unwrap().document().unwrap();
@@ -86,60 +85,50 @@ pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calcula
             }
         }
     }
-    let mut path_open = false;
+    let mut in_graph_area = false;
+    rendering_context.begin_path();
     while x <= x_end {
         y = calculator.calculate(x);
         cache.push((x, y));
         match y {
             Some(val) => {
                 if val < y_start || val > y_end {
-                    if path_open {
+                    if in_graph_area {
                         rendering_context.line_to(x, val);
-                        rendering_context.stroke();
-                        rendering_context.close_path();
-                        path_open = false;
+                        in_graph_area = false;
                     }
                     else {
                         let next_y = calculator.calculate(x + step_size);
                         if let Some(next_val) = next_y {
                             if next_val > y_start && next_val < y_end {
-                                rendering_context.begin_path();
-                                path_open = true;
+                                in_graph_area = true;
                                 rendering_context.move_to(x, val);
                             }
                         }
                     }
                 }
                 else {
-                    if !path_open {
-                        rendering_context.begin_path();
-                        path_open = true;
+                    if !in_graph_area {
+                        in_graph_area = true;
                         rendering_context.move_to(x, val);
                     }
                     else { rendering_context.line_to(x, val); }
                 }
             },
             None => {
-                if path_open {
-                    rendering_context.stroke();
-                    rendering_context.close_path();
-                    path_open = false;
-                }
+                in_graph_area = false;
             }
         }
         x += step_size;
     }
-    if path_open {
-        rendering_context.stroke();
-        rendering_context.close_path();
-    }
+    rendering_context.stroke();
 }
 
 pub fn draw_function_graph_from_cache(rendering_context: &CanvasRenderingContext2d, cache: &Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
     let line_size: f64 = 3e-3 * (x_end - x_start) as f64;
     rendering_context.set_line_width(line_size);
-    let mut i = cache.binary_search_by(|point| points_comparator(point.0, x_start, step_size * 2.0)).unwrap();
+    let mut i = ((x_start - cache[0].0) / step_size).floor() as usize;
     let mut x = cache[i].0;
     let mut y;
     //find first point that is within our graph area
@@ -161,58 +150,41 @@ pub fn draw_function_graph_from_cache(rendering_context: &CanvasRenderingContext
             }
         }
     }
-    let mut path_open = false;
+    let mut in_graph_area = false;
+    rendering_context.begin_path();
     while x <= x_end && i + 1 < cache.len() {
         y = cache[i].1;
         match y {
             Some(val) => {
                 if val < y_start || val > y_end {
-                    if path_open {
+                    if in_graph_area {
                         rendering_context.line_to(x, val);
-                        rendering_context.stroke();
-                        rendering_context.close_path();
-                        path_open = false;
+                        in_graph_area = false;
                     }
                     else {
                         let next_y = cache[i + 1].1;
                         if let Some(next_val) = next_y {
                             if next_val > y_start && next_val < y_end {
-                                rendering_context.begin_path();
-                                path_open = true;
+                                in_graph_area = true;
                                 rendering_context.move_to(x, val);
                             }
                         }
                     }
                 }
                 else {
-                    if !path_open {
-                        rendering_context.begin_path();
-                        path_open = true;
+                    if !in_graph_area {
+                        in_graph_area = true;
                         rendering_context.move_to(x, val);
                     }
                     else { rendering_context.line_to(x, val); }
                 }
             },
             None => {
-                if path_open {
-                    rendering_context.stroke();
-                    rendering_context.close_path();
-                    path_open = false;
-                }
+                in_graph_area = false;
             }
         }
         i += 1;
         x = cache[i].0;
     }
-    if path_open {
-        rendering_context.stroke();
-        rendering_context.close_path();
-    }
-}
-
-fn points_comparator(f1: f64, f2: f64, tolerance: f64) -> Ordering {
-    let val = f1 - f2;
-    if val.abs() <= tolerance { return Ordering::Equal; }
-    else if val < 0.0 { return Ordering::Less; }
-    Ordering::Greater
+    rendering_context.stroke();
 }
