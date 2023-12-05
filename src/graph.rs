@@ -65,7 +65,6 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
     rendering_context.stroke();
 }
 
-
 pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calculator: &mut Calculator, cache: &mut Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
     let line_size: f64 = 3e-3 * ((x_end - x_start) / 2.0) as f64;
