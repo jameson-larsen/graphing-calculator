@@ -60,19 +60,15 @@ init().then(() => {
     let currentViewRange = currentView[1] - currentView[0];
     if(Math.ceil(currentViewRange) >= 40) {
         zoomOut.style.color = "gray";
-        zoomOut.style.cursor = "not-allowed";
     }
     else {
         zoomOut.style.color = "black";
-        zoomOut.style.cursor = "pointer";
     }
     if(Math.floor(currentViewRange) <= 10) {
         zoomIn.style.color = "gray";
-        zoomIn.style.cursor = "not-allowed";
     }
     else {
         zoomIn.style.color = "black";
-        zoomIn.style.cursor = "pointer";
     }
   }
   zoomOut.addEventListener("click", () => {
