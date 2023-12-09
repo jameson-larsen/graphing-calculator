@@ -35,6 +35,10 @@ pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
         transform_canvas(&canvas, &context, x_start, x_end, y_start, y_end);
         draw_initial_grid(&context, x_start, x_end, y_start, y_end, 1);
         graph_each_function(&context, x_start.floor(), x_end.ceil(), y_start, y_end);
+        if x_end - x_start < 20.0 {
+            context.translate(0.5 / (canvas.width() as f64 / (x_end - x_start)), 0.5 / (canvas.height() as f64 / (y_end - y_start))).unwrap();
+            graph_each_function(&context, x_start.floor(), x_end.ceil(), y_start, y_end);
+        }
     })
 }
 
