@@ -10,10 +10,7 @@ init().then(() => {
   let interval;
   let keepDrawing = false;
   let animate = () => {
-    let t1 = performance.now();
     run(currentView[0], currentView[1], currentView[2], currentView[3]);
-    let t2 = performance.now();
-    console.log(t2 - t1);
     if(keepDrawing) {
         requestAnimationFrame(() => {
             animate();
