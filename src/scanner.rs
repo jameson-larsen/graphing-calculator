@@ -87,7 +87,7 @@ pub fn scan(input_string: &String) -> Result<Vec<TokenType>, String> {
     Ok(tokens)
 }
 
-
+//function to scan a number from a numeric string and produce a token containing the parsed floating point value
 fn scan_number(chars: &Vec<char>, start_idx: usize) -> Result<(TokenType, usize), String> {
     let mut curr = String::new();
     let mut i = start_idx;
@@ -107,7 +107,7 @@ fn scan_number(chars: &Vec<char>, start_idx: usize) -> Result<(TokenType, usize)
     Ok((TokenType::NumLiteral(curr.parse::<f64>().unwrap()), i))
 }
 
-
+//function to scan a word from a string and produce a token containing the appropriate constant, function name, or variable
 fn scan_letters(chars: &Vec<char>, start_idx: usize) -> Result<(TokenType, usize), String> {
     let mut curr = String::new();
     let mut i = start_idx;

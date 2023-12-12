@@ -43,6 +43,7 @@ macro_rules! expect_token {
     }
 }
 
+//main parsing function - takes vector of tokens and produced AST
 pub fn parse(tokens: &Vec<TokenType>) -> Result<ASTNodeType, String> {
     let expr = parse_expression(tokens, 0);
     return_if_error_or_unwrap!(expr, stop);
@@ -50,12 +51,15 @@ pub fn parse(tokens: &Vec<TokenType>) -> Result<ASTNodeType, String> {
     Ok(expr)
 }
 
+//function to parse an expression and produce an AST node
 fn parse_expression(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usize), String> {
+    //no empty expressions allowed
     expect_more_tokens!(tokens, start);
     let left = parse_term(tokens, start);
     if let Err(e) = left { return Err(e); }
     let ( mut left, mut next ) = left.unwrap();
 
+    //as long as we see a + or - next in token stream, continue to parse expression, and ensure left associativity
     while next < tokens.len() && (tokens[next] == TokenType::Add || tokens[next] == TokenType::Sub) {
         let operator = tokens[next].clone();
         let right = parse_term(tokens, next + 1);
@@ -69,12 +73,14 @@ fn parse_expression(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeTyp
     Ok((left, next))
 }
 
+//function to parse term and produce an AST node
 fn parse_term(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usize), String> {
     expect_more_tokens!(tokens, start);
     let left = parse_unary(tokens, start);
     if let Err(e) = left { return Err(e); }
     let ( mut left, mut next ) = left.unwrap();
 
+    //same procedure as for expressions, but check for * or /
     while next < tokens.len() && (tokens[next] == TokenType::Mul || tokens[next] == TokenType::Div) {
         let operator = tokens[next].clone();
         let right = parse_unary(tokens, next + 1);
@@ -83,6 +89,7 @@ fn parse_term(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usi
         let right = right_unwrapped.0;
         next = right_unwrapped.1;
         if operator == TokenType::Div {
+            //make division by 0 a syntax error
             if let ASTNodeType::AtomicExpression(TokenType::NumLiteral(num)) = right {
                 if num == 0.0 { return Err(String::from("Error: attempted division by 0")); }
             }
@@ -93,6 +100,7 @@ fn parse_term(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usi
     Ok((left, next))
 }
 
+//function to parse a unary expression and produce an AST node
 fn parse_unary(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usize), String> {
     expect_more_tokens!(tokens, start);
     if tokens[start] == TokenType::Sub {
@@ -107,6 +115,7 @@ fn parse_unary(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, us
     Ok((power, next))
 }
 
+//function to parse a power expression and produce an AST node, ensuring right associativity
 fn parse_power(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usize), String> {
     expect_more_tokens!(tokens, start);
     let base = parse_function(tokens, start);
@@ -121,6 +130,7 @@ fn parse_power(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, us
     Ok((base, next))
 }
 
+//function to parse function and produce AST node
 fn parse_function(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usize), String> {
     expect_more_tokens!(tokens, start);
     if let TokenType::FunctionName(_) = &tokens[start] {
@@ -137,6 +147,7 @@ fn parse_function(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType,
     Ok((atom, next))
 }
 
+//function to parse atomic expression and produce AST node
 fn parse_atom(tokens: &Vec<TokenType>, start: usize) -> Result<(ASTNodeType, usize), String> {
     expect_more_tokens!(tokens, start);
     match &tokens[start] {

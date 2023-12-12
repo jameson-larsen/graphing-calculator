@@ -13,6 +13,7 @@ impl Calculator {
         Calculator { instructions: v, stack: Vec::new(), delta }
     }
 
+    //function to calculate f(x) for the expression represented by this Calculator for a given x - returns None if f is undefined at x
     pub fn calculate(&mut self, x: f64) -> Option<f64> {
         for instruction in self.instructions.iter() {
             match instruction {
@@ -78,6 +79,7 @@ impl Calculator {
     }
 }
 
+//function to take an AST node and produce a vector of instructions for the Calculator to run
 fn generate_instructions(expression: ASTNodeType) -> Vec<CalculatorInstruction> {
     let mut instructions : Vec<CalculatorInstruction> = Vec::new();
     match expression {
@@ -123,6 +125,7 @@ fn generate_instructions(expression: ASTNodeType) -> Vec<CalculatorInstruction> 
     instructions
 }
 
+//function to create a new calculator and generate instructions for it given an AST and a delta
 pub fn generate_calculator(expression: ASTNodeType, delta: f64) -> Calculator {
     let instructions = generate_instructions(expression);
     Calculator::new(instructions, delta)

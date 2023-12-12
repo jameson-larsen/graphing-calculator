@@ -10,6 +10,8 @@ mod scanner;
 mod parser;
 mod calculator;
 mod graph;
+
+//struct to represent global state
 struct AppState {
     calculators: RefCell<Vec<Calculator>>,
     context: Option<CanvasRenderingContext2d>,
@@ -18,6 +20,7 @@ struct AppState {
     delta: f64
 }
 
+//global app state
 thread_local! {
     static APP_STATE : RefCell<AppState> = RefCell::new(AppState { 
         calculators: RefCell::new(Vec::new()), 
@@ -30,6 +33,7 @@ thread_local! {
 
 const MAX_CACHE_SIZE : usize = 100000;
 
+//main function called from JS
 #[wasm_bindgen]
 pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
     APP_STATE.with(|state| {
@@ -46,6 +50,7 @@ pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
     })
 }
 
+//function to reset global app state
 #[wasm_bindgen]
 pub fn reset() {
     APP_STATE.with(|state| {
@@ -57,13 +62,16 @@ pub fn reset() {
     });
 }
 
-//sets up Calculator structs for each function to graph, returns true if successful
+/*sets up Calculator structs for each expression passed in from JS - returns array of booleans indicating whether a Calculator was 
+successfully initialize for each struct*/
 #[wasm_bindgen]
 pub fn initialize(expressions: JsValue) -> JsValue {
     APP_STATE.with(|state| {
         let mut result = Vec::new();
         let mut s = state.borrow_mut();
+        //convert array of expression strings from JS array to Rust vector
         let expressions: Vec<String> = serde_wasm_bindgen::from_value(expressions).unwrap();
+        //scan, parse, and generate calculator for each expression and add to global state
         for expression in expressions.iter() {
             let tokens = scan(expression);
             if let Err(_e) = tokens { 
@@ -85,10 +93,12 @@ pub fn initialize(expressions: JsValue) -> JsValue {
         let (canvas, context) = initialize_canvas();
         s.canvas.replace(canvas);
         s.context.replace(context);
+        //convert back to JS value to pass to JS
         serde_wasm_bindgen::to_value(&result).unwrap()
     })
 }
 
+//function to precalculate points for the current graphed functions outside of the current visible graph viewport
 #[wasm_bindgen]
 pub fn expand_cache() {
     APP_STATE.with(|state| {
@@ -97,16 +107,19 @@ pub fn expand_cache() {
         let mut calculators = s.calculators.borrow_mut();
         if cache.len() > 0 {
             for (i, calculator) in calculators.iter_mut().enumerate() {
+                //expect each function's cache to already contiain the points in the current graph viewport
                 if cache[i].len() == 0 || cache[i].len() >= MAX_CACHE_SIZE { continue; }
                 let cache_start = cache[i][0].0;
                 let cache_end = cache[i][cache[i].len() - 1].0;
                 let mut prepend = Vec::new();
                 let mut append = Vec::new();
+                //expand cache to the left of current viewport
                 for j in (1..=((1.0 / s.delta) as usize)).rev() {
                     let x = cache_start - s.delta * j as f64;
                     let y = calculator.calculate(x);
                     prepend.push((x,y));
                 }
+                //expand cache to the right of current viewport
                 for j in 1..=((1.0 / s.delta) as usize) {
                     let x = cache_end + s.delta * j as f64;
                     let y = calculator.calculate(x);
@@ -120,6 +133,7 @@ pub fn expand_cache() {
     })
 }
 
+//function to graph each function in global state - if that function's cache contains all needed points, use the cache, otherwise, calculate points as we go
 fn graph_each_function(context: &CanvasRenderingContext2d, x_start: f64, x_end: f64, y_start: f64, y_end: f64)  {
     APP_STATE.with(|state| {
         let s = state.borrow();
@@ -136,6 +150,7 @@ fn graph_each_function(context: &CanvasRenderingContext2d, x_start: f64, x_end: 
     })   
 }
 
+//function to set the current step size used for graphing, depending on viewport size
 fn set_delta(x_start: f64, x_end: f64) {
     APP_STATE.with(|state| {
         let mut s = state.borrow_mut();
@@ -152,6 +167,7 @@ fn set_delta(x_start: f64, x_end: f64) {
             }
             s.delta = 0.0009765625;
         }
+        //if we change step size, all cached points are invalidated
         if clear_cache {
             for c in s.cache.borrow_mut().iter_mut() {
                 c.clear();
