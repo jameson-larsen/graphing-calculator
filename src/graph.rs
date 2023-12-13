@@ -3,7 +3,7 @@ use crate::calculator::Calculator;
 use wasm_bindgen::JsCast;
 
 //colors used to draw function graphs
-const COLORS : &[& str] = &["red", "green", "blue", "purple", "orange"];
+const COLORS : &[& str] = &["red", "green", "blue", "purple", "navy"];
 
 //function to get the canvas element from HTML document and set up a rendering context for it
 pub fn initialize_canvas() -> (web_sys::HtmlCanvasElement, CanvasRenderingContext2d) {
