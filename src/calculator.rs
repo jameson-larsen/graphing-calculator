@@ -76,6 +76,9 @@ impl Calculator {
                                 if arg < 0.0 { return None; }
                                 self.stack.push(arg.sqrt()); 
                             }
+                            "abs" => {
+                                self.stack.push(arg.abs());
+                            }
                             _ => ()
                         }
                     }
