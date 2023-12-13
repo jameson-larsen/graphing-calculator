@@ -41,13 +41,16 @@ impl Calculator {
                 CalculatorInstruction::Div => {
                     let right = self.stack.pop().unwrap();
                     let left = self.stack.pop().unwrap();
+                    //return None on division by zero
                     if right.abs() <= self.delta { return None; }
                     self.stack.push(left / right);
                 },
                 CalculatorInstruction::Exp => {
                     let power = self.stack.pop().unwrap();
                     let base = self.stack.pop().unwrap();
-                    self.stack.push(base.powf(power));
+                    let val = base.powf(power);
+                    if val.is_nan() { return None; }
+                    self.stack.push(val);
                 },
                 CalculatorInstruction::ApplyFunc(f) => {
                     let arg = self.stack.pop().unwrap();
@@ -63,11 +66,15 @@ impl Calculator {
                                 let val = arg.log10();
                                 if val == std::f64::NEG_INFINITY { return None; }
                                 self.stack.push(val);
-                            }
+                            },
                             "ln" => {
                                 let val = arg.ln();
                                 if val == std::f64::NEG_INFINITY { return None; }
                                 self.stack.push(val);
+                            },
+                            "sqrt" => {
+                                if arg < 0.0 { return None; }
+                                self.stack.push(arg.sqrt()); 
                             }
                             _ => ()
                         }

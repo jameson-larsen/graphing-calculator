@@ -1,6 +1,6 @@
 use std::fmt;
 
-const RECOGNIZED_FUNCTIONS: &[& str] = &["sin", "cos", "tan", "log", "ln"];
+const RECOGNIZED_FUNCTIONS: &[& str] = &["sin", "cos", "tan", "log", "ln", "sqrt"];
 const RECOGNIZED_CONSTANTS: &[& str] = &["e", "pi"];
 const RECOGNIZED_VARIABLES: &[& str] = &["x"];
 
