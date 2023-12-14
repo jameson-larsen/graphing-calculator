@@ -10,6 +10,7 @@ init().then(() => {
     const canvas = document.getElementById("canvas");
     let interval;
     let keepDrawing = false;
+
     //function to draw each function graph at each animation frame while needed (when dragging)
     let animate = () => {
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
@@ -19,6 +20,8 @@ init().then(() => {
             });
         }
     }
+
+    //event handlers for desktop
     canvas.addEventListener("mousedown", (e) => {
         //set drag start point
         x = e.offsetX / (canvas.width / (currentView[1] - currentView[0]));
@@ -61,6 +64,66 @@ init().then(() => {
             interval = setInterval(() => { expand_cache(); }, 33);
         }
     })
+    //fixes bug caused when user attempts to drag and drop item onto drawing canvas
+    canvas.addEventListener("dragover", () => {
+        dragging = false;
+        keepDrawing = false;
+    })
+    
+    //touch events for mobile
+    canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        //only support one finger drag
+        if(e.touches.length === 1) {
+            //set drag start point
+            let touch = e.touches[0];
+            x = (touch.pageX - canvas.offsetLeft) / (canvas.width / (currentView[1] - currentView[0]));
+            y = (touch.pageY - canvas.offsetTop) / (canvas.width / (currentView[3] - currentView[2]));
+            dragging = true;
+            //stop expanding cache
+            clearInterval(interval);
+            interval = null;
+            keepDrawing = true;
+            animate();
+        }
+    })
+    canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (dragging && e.touches.length === 1) {
+            //update the current visible graph viewport based on drag coordinates
+            let touch = e.touches[0];
+            if (canvas !== document.elementFromPoint(touch.pageX, touch.pageY)) {
+                dragging = false;
+                keepDrawing = false;
+                if (!interval) {
+                    //once we stop dragging reset interval to expand our points cache
+                    interval = setInterval(() => { expand_cache(); }, 33);
+                }
+            }
+            let scaledOffsetX = (touch.pageX - canvas.offsetLeft) / (canvas.width / (currentView[1] - currentView[0]));
+            let scaledOffsetY = (touch.pageY - canvas.offsetTop) / (canvas.height / (currentView[3] - currentView[2]));
+            let dragX = x - scaledOffsetX;
+            let dragY = y - scaledOffsetY;
+            //multiply drag lengths by 1.25 for quicker dragging in mobile
+            currentView[0] = currentView[0] + dragX;
+            currentView[1] = currentView[1] + dragX;
+            currentView[2] = currentView[2] - dragY;
+            currentView[3] = currentView[3] - dragY;
+            x = scaledOffsetX;
+            y = scaledOffsetY;
+        } 
+    })
+    canvas.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        dragging = false;
+        keepDrawing = false;
+        if (!interval) {
+            //once we stop dragging reset interval to expand our points cache
+            interval = setInterval(() => { expand_cache(); }, 33);
+        }
+    })
+
+    //zoom functionality
     let zoomIn = document.getElementById("zoom-in");
     let zoomOut = document.getElementById("zoom-out");
     let adjustButtonStyles = () => {
@@ -119,6 +182,8 @@ init().then(() => {
             interval = setInterval(() => { expand_cache(); }, 33);
         }
     })
+
+    //event handlers for function inputs
     let inputs = document.getElementsByClassName("function-input");
     for (let i = 0; i < inputs.length; ++i) {
         let el = inputs[i];
@@ -149,9 +214,4 @@ init().then(() => {
             }
         })
     }
-    //fixes bug caused when user attempts to drag and drop item onto drawing canvas
-    canvas.addEventListener("dragover", () => {
-        dragging = false;
-        keepDrawing = false;
-    })
 });
