@@ -227,9 +227,9 @@ init().then(() => {
         let height = parseInt(getComputedStyle(canvas).height);
         //only resize once difference hits 100px to avoid resizing too often
         if(Math.abs(height - canvas.height) > 100) {
-            //only allow canvas to go up to 600x600
-            canvas.height = Math.max(height, 600);
-            canvas.width = Math.max(height, 600);
+            //only allow canvas to go up to 700x700
+            canvas.height = Math.max(height, 700);
+            canvas.width = Math.max(height, 700);
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
         }
     })
