@@ -10,12 +10,15 @@ body {
     min-height:100%;
     display:flex;
     justify-content:space-evenly;
+    flex-wrap:wrap-reverse;
     align-items:start;
-    overflow-y:hidden;
+    font-size:16px;
+    background:#ECE9E6;
 }
 #canvas {
     border:1px solid black;
-    height:calc(100vh - 2px);
+    height:min(calc(100vh - 6px), calc(100vw - 6px));
+    background:white;
 }
 #canvas-container {
     position:relative;
@@ -26,11 +29,11 @@ body {
     flex-direction:column;
     top:10px;
     right:10px;
-    width:40px;
+    width:2.5em;
 }
 #zoom-container button {
-    height:75px;
-    font-size:35px;
+    height:2.5em;
+    font-size:2em;
     border:2px solid black;
 }
 #zoom-container button:first-child {
@@ -50,16 +53,17 @@ body {
     display:flex;
     justify-content:space-evenly;
     align-items:center;
+    margin:0 2.5em;
 }
 #functions-container form div label {
-    font-size:20px;
+    font-size:1.25em;
     font-style:italic;
-    margin-right:10px;
+    margin-right:1em;
 }
 .function-input {
-    height:30px;
+    height:1.75em;
     border:1px solid black;
-    font-size:18px;
+    font-size:1.25em;
 }
 .function-input:focus {
     outline:1px solid black;
@@ -70,4 +74,19 @@ body {
 .function-input.error:focus {
     outline:1px solid red;
 }
-
+@media only screen and (max-width: 450px) {
+    body {
+        font-size:12px;
+    }
+    #functions-container form div {
+        margin:0;
+    }
+    #functions-container form div label {
+        font-size:1.5em;
+    }
+}
+@media only screen and (max-width: 320px) {
+    body {
+        font-size:10px;
+    }
+}
