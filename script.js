@@ -4,8 +4,8 @@ init().then(() => {
     const canvas = document.getElementById("canvas");
     let height = parseInt(getComputedStyle(canvas).height);
     if(height < canvas.height) {
-        canvas.height = height;
-        canvas.width = height;
+        canvas.height = Math.min(height - 100, 700);
+        canvas.width = Math.min(height - 100, 700);
     }
 
     //draw empty grid on canvas
