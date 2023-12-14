@@ -1,5 +1,22 @@
 import init, { run, initialize, reset, expand_cache } from "./pkg/graphing_calculator.js";
 init().then(() => {
+    //resize canvas if necessary
+    const canvas = document.getElementById("canvas");
+    let height = parseInt(getComputedStyle(canvas).height);
+    if(height < canvas.height) {
+        canvas.height = height;
+        canvas.width = height;
+    }
+    //resize canvas on window resize
+    addEventListener("resize", () => {
+        let height = parseInt(getComputedStyle(canvas).height);
+        //only resize once difference hits 100px to avoid resizing too often
+        if(Math.abs(height - canvas.height) > 100) {
+            //only allow canvas to go up to 600x600
+            canvas.height = Math.max(height, 600);
+            canvas.width = Math.max(height, 600);
+        }
+    })
     //draw empty grid on canvas
     initialize([]);
     run(-5.0, 5.0, -5.0, 5.0);
@@ -7,7 +24,6 @@ init().then(() => {
     let dragging = false;
     let x = 0;
     let y = 0;
-    const canvas = document.getElementById("canvas");
     let interval;
     let keepDrawing = false;
 
