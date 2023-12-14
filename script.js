@@ -4,8 +4,8 @@ init().then(() => {
     const canvas = document.getElementById("canvas");
     let height = parseInt(getComputedStyle(canvas).height);
     if(height < canvas.height) {
-        canvas.height = Math.min(height - 100, 700);
-        canvas.width = Math.min(height - 100, 700);
+        canvas.height = Math.min(height, 700);
+        canvas.width = Math.min(height, 700);
     }
 
     //draw empty grid on canvas
@@ -227,8 +227,7 @@ init().then(() => {
         let height = parseInt(getComputedStyle(canvas).height);
         //only resize once difference hits 100px to avoid resizing too often
         if(Math.abs(height - canvas.height) > 100) {
-            //set dimensions to 100 less than displayed dimensions, only allow canvas to go up to 700x700
-            height = height - 100;
+            //only allow canvas to go up to 700x700
             canvas.height = Math.max(height, 700);
             canvas.width = Math.max(height, 700);
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
