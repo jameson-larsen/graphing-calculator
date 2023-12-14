@@ -44,9 +44,9 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
     rendering_context.set_stroke_style(&"gray".into());
     let start = (x_start + 1.0).floor() as i32;
     let end = x_end.ceil() as i32;
-    //use 1px and 2px lines
-    let line_size = 1.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
-    let main_axis_size = 2.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
+    //use 0.5px and 1px lines
+    let line_size = 0.5 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
+    let main_axis_size = 1.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
     rendering_context.begin_path();
     rendering_context.set_line_width(line_size);
     //draw all vertical minor grid lines
