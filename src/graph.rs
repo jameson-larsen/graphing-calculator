@@ -77,8 +77,8 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
 //function to draw a given function on canvas based on the values provided by the Calculator struct representing that function - caches values for future drawing
 pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calculator: &mut Calculator, cache: &mut Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
-    //0.9px for large canvas, 0.75px for smaller canvas (avoids line joining algorithm slow down)
-    let line_size = if rendering_context.canvas().unwrap().width() > 450 { 0.9 } else { 0.75 };
+    //0.9px for large canvas, 0.5px for smaller canvas (avoids line joining algorithm slow down)
+    let line_size = if rendering_context.canvas().unwrap().width() > 450 { 0.9 } else { 0.5 };
     let line_size = line_size / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
     rendering_context.set_line_width(line_size);
     let mut x = x_start;
