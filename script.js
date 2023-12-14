@@ -8,8 +8,6 @@ init().then(() => {
         canvas.width = height;
     }
 
-    document.getElementById("blah").innerText = canvas.height;
-
     //draw empty grid on canvas
     initialize([]);
     run(-5.0, 5.0, -5.0, 5.0);
