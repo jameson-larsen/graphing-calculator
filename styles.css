@@ -17,7 +17,7 @@ body {
 }
 #canvas {
     border:1px solid black;
-    height:min(calc(100vh - 6px), calc(100vw - 6px));
+    height:min(calc(100vh - 6px), calc(100vw - 6px), 700px);
     background:white;
 }
 #canvas-container {
