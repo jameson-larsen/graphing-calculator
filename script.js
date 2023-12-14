@@ -15,7 +15,7 @@ init().then(() => {
     let dragging = false;
     let x = 0;
     let y = 0;
-    let interval;
+    let keepExpanding = false;
     let keepDrawing = false;
 
     //function to draw each function graph at each animation frame while needed (when dragging)
@@ -28,6 +28,14 @@ init().then(() => {
         }
     }
 
+    //function to expand cache while we're not dragging
+    let expand = () => {
+        if(keepExpanding) {
+            expand_cache();
+            setTimeout(expand, 100);
+        }
+    }
+
     //event handlers for desktop
     canvas.addEventListener("mousedown", (e) => {
         //set drag start point
@@ -35,8 +43,7 @@ init().then(() => {
         y = e.offsetY / (canvas.width / (currentView[3] - currentView[2]));
         dragging = true;
         //stop expanding cache
-        clearInterval(interval);
-        interval = null;
+        keepExpanding = false;
         keepDrawing = true;
         animate();
     })
@@ -58,17 +65,19 @@ init().then(() => {
     canvas.addEventListener("mouseup", () => {
         dragging = false;
         keepDrawing = false;
-        if (!interval) {
-            //once we stop dragging reset interval to expand our points cache
-            interval = setInterval(() => { expand_cache(); }, 33);
+        if (!keepExpanding) {
+            //once we stop dragging reset expand our points cache
+            keepExpanding = true;
+            expand();
         }
     })
     //same as mouseup
     canvas.addEventListener("mouseleave", () => {
         dragging = false;
         keepDrawing = false;
-        if (!interval) {
-            interval = setInterval(() => { expand_cache(); }, 33);
+        if (!keepExpanding) {
+            keepExpanding = true;
+            expand();
         }
     })
     //fixes bug caused when user attempts to drag and drop item onto drawing canvas
@@ -88,8 +97,7 @@ init().then(() => {
             y = (touch.pageY - canvas.offsetTop) / (canvas.width / (currentView[3] - currentView[2]));
             dragging = true;
             //stop expanding cache
-            clearInterval(interval);
-            interval = null;
+            keepExpanding = false;
             keepDrawing = true;
             animate();
         }
@@ -102,9 +110,10 @@ init().then(() => {
             if (canvas !== document.elementFromPoint(touch.pageX, touch.pageY)) {
                 dragging = false;
                 keepDrawing = false;
-                if (!interval) {
-                    //once we stop dragging reset interval to expand our points cache
-                    interval = setInterval(() => { expand_cache(); }, 33);
+                if (!keepExpanding) {
+                    //once we stop dragging expand our points cache
+                    keepExpanding = true;
+                    expand();
                 }
             }
             let scaledOffsetX = (touch.pageX - canvas.offsetLeft) / (canvas.width / (currentView[1] - currentView[0]));
@@ -124,9 +133,10 @@ init().then(() => {
         e.preventDefault();
         dragging = false;
         keepDrawing = false;
-        if (!interval) {
-            //once we stop dragging reset interval to expand our points cache
-            interval = setInterval(() => { expand_cache(); }, 33);
+        if (!keepExpanding) {
+            //once we stop dragging expand our points cache
+            keepExpanding = true;
+            expand();
         }
     })
 
@@ -165,9 +175,10 @@ init().then(() => {
         keepDrawing = false;
         //redraw graphs for new viewport size
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
-        if (!interval) {
+        if (!keepExpanding) {
             //expand cache
-            interval = setInterval(() => { expand_cache(); }, 33);
+            keepExpanding = true;
+            expand();
         }
     })
     zoomIn.addEventListener("click", () => {
@@ -185,8 +196,9 @@ init().then(() => {
         adjustButtonStyles();
         keepDrawing = false;
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
-        if (!interval) {
-            interval = setInterval(() => { expand_cache(); }, 33);
+        if (!keepExpanding) {
+            keepExpanding = true;
+            expand();
         }
     })
 
@@ -208,8 +220,9 @@ init().then(() => {
             let result = initialize(functions);
             //draw new function graphs
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
-            if (!interval) {
-                interval = setInterval(() => { expand_cache(); }, 33);
+            if (!keepExpanding) {
+                keepExpanding = true
+                expand();
             }
             //indicate no error for this input
             el.className = "function-input";
