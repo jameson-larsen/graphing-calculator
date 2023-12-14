@@ -1,0 +1,23 @@
+{
+  "name": "graphing_calculator",
+  "collaborators": [
+    "Jameson Larsen larsenjameson@gmail.com"
+  ],
+  "description": "A simple web graphing calculator using wasm",
+  "version": "0.1.0",
+  "license": "MIT/Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jameson-larsen/graphing-calculator"
+  },
+  "files": [
+    "graphing_calculator_bg.wasm",
+    "graphing_calculator.js",
+    "graphing_calculator.d.ts"
+  ],
+  "module": "graphing_calculator.js",
+  "types": "graphing_calculator.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
