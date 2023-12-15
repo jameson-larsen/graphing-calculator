@@ -44,7 +44,7 @@ pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
         reset_canvas(&canvas, &context);
         transform_canvas(&canvas, &context, x_start, x_end, y_start, y_end);
         draw_initial_grid(&context, x_start, x_end, y_start, y_end, 1);
-        graph_each_function(&context, x_start, x_end, y_start, y_end);
+        graph_each_function(&context, x_start.floor(), x_end.ceil(), y_start, y_end);
     })
 }
 
@@ -114,13 +114,13 @@ pub fn expand_cache() -> bool {
                 let mut prepend = Vec::new();
                 let mut append = Vec::new();
                 //expand cache to the left of current viewport
-                for j in (1..=((0.5 / s.delta) as usize)).rev() {
+                for j in (1..=50).rev() {
                     let x = cache_start - s.delta * j as f64;
                     let y = calculator.calculate(x);
                     prepend.push((x,y));
                 }
                 //expand cache to the right of current viewport
-                for j in 1..=((0.5 / s.delta) as usize) {
+                for j in 1..=50 {
                     let x = cache_end + s.delta * j as f64;
                     let y = calculator.calculate(x);
                     append.push((x,y));
