@@ -16,8 +16,9 @@ export function reset(): void;
 */
 export function initialize(expressions: any): any;
 /**
+* @returns {boolean}
 */
-export function expand_cache(): void;
+export function expand_cache(): boolean;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
@@ -26,7 +27,7 @@ export interface InitOutput {
   readonly run: (a: number, b: number, c: number, d: number) => void;
   readonly reset: () => void;
   readonly initialize: (a: number) => number;
-  readonly expand_cache: () => void;
+  readonly expand_cache: () => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_exn_store: (a: number) => void;

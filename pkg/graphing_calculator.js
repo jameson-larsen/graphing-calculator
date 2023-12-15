@@ -214,9 +214,11 @@ export function initialize(expressions) {
 }
 
 /**
+* @returns {boolean}
 */
 export function expand_cache() {
-    wasm.expand_cache();
+    const ret = wasm.expand_cache();
+    return ret !== 0;
 }
 
 function handleError(f, args) {

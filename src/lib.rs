@@ -96,29 +96,31 @@ pub fn initialize(expressions: JsValue) -> JsValue {
     })
 }
 
-//function to precalculate points for the current graphed functions outside of the current visible graph viewport
+//function to precalculate points for the current graphed functions outside of the current visible graph viewport - returns true if all caches full, false otherwise
 #[wasm_bindgen]
-pub fn expand_cache() {
+pub fn expand_cache() -> bool {
     APP_STATE.with(|state| {
         let s = state.borrow();
         let mut cache = s.cache.borrow_mut();
         let mut calculators = s.calculators.borrow_mut();
+        let mut caches_full = true;
         if cache.len() > 0 {
             for (i, calculator) in calculators.iter_mut().enumerate() {
                 //expect each function's cache to already contiain the points in the current graph viewport
                 if cache[i].len() == 0 || cache[i].len() >= MAX_CACHE_SIZE { continue; }
+                caches_full = false;
                 let cache_start = cache[i][0].0;
                 let cache_end = cache[i][cache[i].len() - 1].0;
                 let mut prepend = Vec::new();
                 let mut append = Vec::new();
                 //expand cache to the left of current viewport
-                for j in (1..=((1.0 / s.delta) as usize)).rev() {
+                for j in (1..=((0.5 / s.delta) as usize)).rev() {
                     let x = cache_start - s.delta * j as f64;
                     let y = calculator.calculate(x);
                     prepend.push((x,y));
                 }
                 //expand cache to the right of current viewport
-                for j in 1..=((1.0 / s.delta) as usize) {
+                for j in 1..=((0.5 / s.delta) as usize) {
                     let x = cache_end + s.delta * j as f64;
                     let y = calculator.calculate(x);
                     append.push((x,y));
@@ -128,6 +130,7 @@ pub fn expand_cache() {
                 cache[i] = prepend;
             }
         }
+        caches_full
     })
 }
 

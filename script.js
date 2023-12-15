@@ -21,7 +21,7 @@ init().then(() => {
     //function to draw each function graph at each animation frame while needed (when dragging)
     let animate = () => {
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
-        if (keepDrawing) {
+        if(keepDrawing) {
             requestAnimationFrame(() => {
                 animate();
             });
@@ -31,8 +31,10 @@ init().then(() => {
     //function to expand cache while we're not dragging
     let expand = () => {
         if(keepExpanding) {
-            expand_cache();
-            setTimeout(expand, 100);
+            let cachesFull = expand_cache();
+            if(!cachesFull) {
+                setTimeout(expand, 33);
+            }
         }
     }
 
@@ -220,10 +222,8 @@ init().then(() => {
             let result = initialize(functions);
             //draw new function graphs
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
-            if (!keepExpanding) {
-                keepExpanding = true
-                expand();
-            }
+            keepExpanding = true
+            expand();
             //indicate no error for this input
             el.className = "function-input";
             for (let r of result) {
