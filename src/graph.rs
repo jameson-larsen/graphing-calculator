@@ -45,9 +45,9 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
     rendering_context.set_stroke_style(&"gray".into());
     let start = (x_start + 1.0).floor() as i32;
     let end = x_end.ceil() as i32;
-    //use 0.5px and 1px lines
-    let line_size = 0.5 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
-    let main_axis_size = 1.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
+    //use 1px and 2px lines
+    let line_size = 1.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
+    let main_axis_size = 2.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
     rendering_context.begin_path();
     rendering_context.set_line_width(line_size);
     //draw all vertical minor grid lines
@@ -78,8 +78,8 @@ pub fn draw_initial_grid(rendering_context: &CanvasRenderingContext2d, x_start: 
 //function to draw a given function on canvas based on the values provided by the Calculator struct representing that function - caches values for future drawing
 pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calculator: &mut Calculator, cache: &mut Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
-    //0.9px
-    let line_size = 0.9 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
+    //2px
+    let line_size = 2.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
     rendering_context.set_line_width(line_size);
     let mut x = x_start;
     let mut y;
@@ -144,8 +144,8 @@ pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calcula
 //function to draw a given function on canvas based on the values provided in that function's cache
 pub fn draw_function_graph_from_cache(rendering_context: &CanvasRenderingContext2d, cache: &Vec<(f64, Option<f64>)>, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
     rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
-    //0.9px
-    let line_size = 0.9 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
+    //2px
+    let line_size = 2.0 / (rendering_context.canvas().unwrap().width() as f64 / (x_end - x_start));
     rendering_context.set_line_width(line_size);
     //index into cache
     let mut i = ((x_start - cache[0].0) / step_size).floor() as usize;

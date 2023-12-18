@@ -27,7 +27,7 @@ thread_local! {
         context: None, 
         canvas: None, 
         cache: RefCell::new(Vec::new()),
-        delta: 0.0009765625
+        delta: 0.001953125
     });
 }
 
@@ -157,16 +157,16 @@ fn set_delta(x_start: f64, x_end: f64) {
         let mut s = state.borrow_mut();
         let mut clear_cache = false;
         if x_end - x_start > 20.0 {
-            if s.delta == 0.0009765625 {
-                clear_cache = true;
-            }
-            s.delta = 0.001953125;
-        }
-        else {
             if s.delta == 0.001953125 {
                 clear_cache = true;
             }
-            s.delta = 0.0009765625;
+            s.delta = 0.00390625;
+        }
+        else {
+            if s.delta == 0.00390625 {
+                clear_cache = true;
+            }
+            s.delta = 0.001953125;
         }
         //if we change step size, all cached points are invalidated
         if clear_cache {

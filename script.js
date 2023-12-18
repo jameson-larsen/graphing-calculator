@@ -31,10 +31,7 @@ init().then(() => {
     //function to expand cache while we're not dragging
     let expand = () => {
         if(keepExpanding) {
-            let t1 = performance.now();
             let cachesFull = expand_cache();
-            let t2 = performance.now();
-            console.log(t2 - t1)
             if(!cachesFull) {
                 setTimeout(expand, 5);
             }
