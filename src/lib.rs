@@ -44,6 +44,7 @@ pub fn run(x_start: f64, x_end: f64, y_start: f64, y_end: f64) {
         reset_canvas(&canvas, &context);
         transform_canvas(&canvas, &context, x_start, x_end, y_start, y_end);
         draw_initial_grid(&context, x_start, x_end, y_start, y_end, 1);
+        //note: draw_initial_grid should leave rendering context with the correct line width for graph_each_function - the width of the main graph axes should equal the width of the function lines 
         graph_each_function(&context, x_start.floor(), x_end.ceil(), y_start, y_end);
     })
 }
