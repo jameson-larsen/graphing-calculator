@@ -123,7 +123,8 @@ fn scan_letters(chars: &Vec<char>, start_idx: usize) -> Result<(TokenType, usize
         candidates = candidates
                     .iter()
                     .map(|v| (*v).iter().map(|s| *s).filter(|el| el.starts_with(&curr)).collect()).collect();
-        if match_found(&candidates, &curr) { break; }
+        //for a match to be found, there must be only one candidate left and it must match string exactly
+        if candidates[0].len() + candidates[1].len() + candidates[2].len() == 1 && match_found(&candidates, &curr) { break; }
         candidates_left = !candidates.iter().all(|el| el.is_empty());
     }
 
@@ -131,9 +132,9 @@ fn scan_letters(chars: &Vec<char>, start_idx: usize) -> Result<(TokenType, usize
     let function_candidates = &candidates[1];
     let variable_candidates = &candidates[2];
     
-    if !constant_candidates.is_empty() { return Ok((TokenType::Constant(curr), i)); }
-    else if !function_candidates.is_empty() { return Ok((TokenType::FunctionName(curr), i)); }
-    else if !variable_candidates.is_empty() { return Ok((TokenType::Variable(curr), i)); }
+    if !constant_candidates.is_empty() && constant_candidates[0] == curr { return Ok((TokenType::Constant(curr), i)); }
+    else if !function_candidates.is_empty() && function_candidates[0] == curr { return Ok((TokenType::FunctionName(curr), i)); }
+    else if !variable_candidates.is_empty() && variable_candidates[0] == curr { return Ok((TokenType::Variable(curr), i)); }
 
     return Err(format!("Error: invalid word '{curr}' found"))
 }
