@@ -1,3 +1,4 @@
+use std::f64::consts::PI;
 use web_sys::CanvasRenderingContext2d;
 use crate::calculator::Calculator;
 use wasm_bindgen::JsCast;
@@ -134,6 +135,75 @@ pub fn draw_function_graph(rendering_context: &CanvasRenderingContext2d, calcula
             }
         }
         x += step_size;
+    }
+    rendering_context.stroke();
+}
+
+//function to draw a given function on canvas using polar coordinates based on the values provided by the Calculator struct representing that function - does not cache values
+pub fn draw_function_graph_polar(rendering_context: &CanvasRenderingContext2d, calculator: &mut Calculator, x_start: f64, x_end: f64, y_start: f64, y_end: f64, step_size: f64, idx: usize) {
+    rendering_context.set_stroke_style(&COLORS[idx % COLORS.len()].into());
+    let mut theta = 0.0;
+    let mut r;
+    //find first point that is within our graph area and set x to it
+    while theta <= 2.0 * PI {
+        let next_r = calculator.calculate(theta + step_size);
+        if next_r == None {
+            theta += step_size;
+            continue;
+        }
+        if let Some(num) = next_r {
+            //convert to cartesian coordinates for bounds checking
+            let x = theta.cos() * num;
+            let y = theta.sin() * num;
+            if y < y_start || y > y_end || x < x_start || x > x_end {
+                theta += step_size;
+                continue;
+            }
+            else {
+                break; 
+            }
+        }
+    }
+    //represents whether the last point we calculated was inside our current graph viewport or not
+    let mut in_graph_area = false;
+    rendering_context.begin_path();
+    while theta <= 2.0 * PI {
+        r = calculator.calculate(theta);
+        //convert to cartesian coordinates
+        let (x, y) = if r == None { (0.0, None) } else { (theta.cos() * r.unwrap(), Some(theta.sin() * r.unwrap())) };
+        match y {
+            Some(val) => {
+                if val < y_start || val > y_end || x < x_start || x > x_end {
+                    if in_graph_area {
+                        rendering_context.line_to(x, val);
+                        in_graph_area = false;
+                    }
+                    else {
+                        let next_theta = theta + step_size;
+                        let next_r = calculator.calculate(next_theta);
+                        if let Some(next_val) = next_r {
+                            let next_x = next_theta.cos() * next_val;
+                            let next_y = next_theta.sin() * next_val;
+                            if next_y > y_start && next_y < y_end && next_x > x_start && next_x < x_end {
+                                in_graph_area = true;
+                                rendering_context.move_to(x, val);
+                            }
+                        }
+                    }
+                }
+                else {
+                    if !in_graph_area {
+                        in_graph_area = true;
+                        rendering_context.move_to(x, val);
+                    }
+                    else { rendering_context.line_to(x, val); }
+                }
+            },
+            None => {
+                in_graph_area = false;
+            }
+        }
+        theta += step_size;
     }
     rendering_context.stroke();
 }

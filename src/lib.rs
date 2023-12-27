@@ -17,7 +17,8 @@ struct AppState {
     context: Option<CanvasRenderingContext2d>,
     canvas: Option<HtmlCanvasElement>,
     cache: RefCell<Vec<Vec<(f64, Option<f64>)>>>,
-    delta: f64
+    delta: f64,
+    polar_mode: bool
 }
 
 //global app state
@@ -27,7 +28,8 @@ thread_local! {
         context: None, 
         canvas: None, 
         cache: RefCell::new(Vec::new()),
-        delta: 0.001953125
+        delta: 0.001953125,
+        polar_mode: false
     });
 }
 
@@ -102,6 +104,8 @@ pub fn initialize(expressions: JsValue) -> JsValue {
 pub fn expand_cache() -> bool {
     APP_STATE.with(|state| {
         let s = state.borrow();
+        //if we're in polar mode, don't expand cache
+        if s.polar_mode { return true; }
         let mut cache = s.cache.borrow_mut();
         let mut calculators = s.calculators.borrow_mut();
         let mut caches_full = true;
@@ -135,6 +139,24 @@ pub fn expand_cache() -> bool {
     })
 }
 
+//function to be called from JS to toggle between cartesian and polar modes
+#[wasm_bindgen]
+pub fn toggle_mode() {
+    APP_STATE.with(|state| {
+        let mut s = state.borrow_mut();
+        if s.polar_mode {
+            s.polar_mode = false;
+        }
+        else {
+            s.polar_mode = true;
+        }
+        //clear cached points on mode switch
+        for c in s.cache.borrow_mut().iter_mut() {
+            c.clear();
+        }
+    })
+}
+
 //function to graph each function in global state - if that function's cache contains all needed points, use the cache, otherwise, calculate points as we go
 fn graph_each_function(context: &CanvasRenderingContext2d, x_start: f64, x_end: f64, y_start: f64, y_end: f64)  {
     APP_STATE.with(|state| {
@@ -146,7 +168,12 @@ fn graph_each_function(context: &CanvasRenderingContext2d, x_start: f64, x_end: 
             }
             else {
                 if cache.len() > i { cache[i].clear(); }
-                draw_function_graph(context, calculator, &mut cache[i], x_start, x_end, y_start, y_end, s.delta, i);
+                if s.polar_mode {
+                    draw_function_graph_polar(context, calculator, x_start, x_end, y_start, y_end, s.delta, i);
+                }
+                else {
+                    draw_function_graph(context, calculator, &mut cache[i], x_start, x_end, y_start, y_end, s.delta, i);
+                }
             }
         }
     })   
@@ -157,7 +184,11 @@ fn set_delta(x_start: f64, x_end: f64) {
     APP_STATE.with(|state| {
         let mut s = state.borrow_mut();
         let mut clear_cache = false;
-        if x_end - x_start > 20.0 {
+        //if we're in polar mode, always use smaller delta
+        if s.polar_mode {
+            s.delta = 0.001953125;
+        }
+        else if x_end - x_start > 20.0 {
             if s.delta == 0.001953125 {
                 clear_cache = true;
             }

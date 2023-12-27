@@ -1,4 +1,4 @@
-import init, { run, initialize, reset, expand_cache } from "./pkg/graphing_calculator.js";
+import init, { run, initialize, reset, expand_cache, toggle_mode } from "./pkg/graphing_calculator.js";
 init().then(() => {
     //resize canvas if necessary
     const canvas = document.getElementById("canvas");
@@ -15,8 +15,8 @@ init().then(() => {
     let dragging = false;
     let x = 0;
     let y = 0;
-    let keepExpanding = false;
     let keepDrawing = false;
+    let expandTimeout = null;
 
     //function to draw each function graph at each animation frame while needed (when dragging)
     let animate = () => {
@@ -30,11 +30,9 @@ init().then(() => {
 
     //function to expand cache while we're not dragging
     let expand = () => {
-        if(keepExpanding) {
-            let cachesFull = expand_cache();
-            if(!cachesFull) {
-                setTimeout(expand, 5);
-            }
+        let cachesFull = expand_cache();
+        if(!cachesFull && !expandTimeout) {
+            expandTimeout = setTimeout(expand, 5);
         }
     }
 
@@ -45,7 +43,8 @@ init().then(() => {
         y = e.offsetY / (canvas.width / (currentView[3] - currentView[2]));
         dragging = true;
         //stop expanding cache
-        keepExpanding = false;
+        clearTimeout(expandTimeout);
+        expandTimeout = null;
         keepDrawing = true;
         animate();
     })
@@ -67,9 +66,8 @@ init().then(() => {
     canvas.addEventListener("mouseup", () => {
         dragging = false;
         keepDrawing = false;
-        if (!keepExpanding) {
-            //once we stop dragging reset expand our points cache
-            keepExpanding = true;
+        //once we stop dragging expand our points cache
+        if(!expandTimeout) {
             expand();
         }
     })
@@ -77,8 +75,7 @@ init().then(() => {
     canvas.addEventListener("mouseleave", () => {
         dragging = false;
         keepDrawing = false;
-        if (!keepExpanding) {
-            keepExpanding = true;
+        if(!expandTimeout) {
             expand();
         }
     })
@@ -99,7 +96,8 @@ init().then(() => {
             y = (touch.pageY - canvas.offsetTop) / (canvas.width / (currentView[3] - currentView[2]));
             dragging = true;
             //stop expanding cache
-            keepExpanding = false;
+            clearTimeout(expandTimeout);
+            expandTimeout = null;
             keepDrawing = true;
             animate();
         }
@@ -112,9 +110,8 @@ init().then(() => {
             if (canvas !== document.elementFromPoint(touch.pageX, touch.pageY)) {
                 dragging = false;
                 keepDrawing = false;
-                if (!keepExpanding) {
-                    //once we stop dragging expand our points cache
-                    keepExpanding = true;
+                //once we stop dragging expand our points cache
+                if(!expandTimeout) {
                     expand();
                 }
             }
@@ -135,9 +132,8 @@ init().then(() => {
         e.preventDefault();
         dragging = false;
         keepDrawing = false;
-        if (!keepExpanding) {
-            //once we stop dragging expand our points cache
-            keepExpanding = true;
+        //once we stop dragging expand our points cache
+        if(!expandTimeout) {
             expand();
         }
     })
@@ -177,9 +173,7 @@ init().then(() => {
         keepDrawing = false;
         //redraw graphs for new viewport size
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
-        if (!keepExpanding) {
-            //expand cache
-            keepExpanding = true;
+        if(!expandTimeout) {
             expand();
         }
     })
@@ -198,8 +192,7 @@ init().then(() => {
         adjustButtonStyles();
         keepDrawing = false;
         run(currentView[0], currentView[1], currentView[2], currentView[3]);
-        if (!keepExpanding) {
-            keepExpanding = true;
+        if(!expandTimeout) {
             expand();
         }
     })
@@ -222,8 +215,9 @@ init().then(() => {
             let result = initialize(functions);
             //draw new function graphs
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
-            keepExpanding = true
-            expand();
+            if(!expandTimeout) {
+                expand();
+            }
             //indicate no error for this input
             el.className = "function-input";
             for (let r of result) {
@@ -243,7 +237,32 @@ init().then(() => {
             //only allow canvas to go up to 700x700
             canvas.height = Math.min(height, 700);
             canvas.width = Math.min(height, 700);
+            reset();
+            let functions = [];
+            for (let el of inputs) {
+                //disregard empty inputs
+                if (el.value !== "") {
+                    functions.push(el.value);
+                }
+            }
+            initialize(functions);
             run(currentView[0], currentView[1], currentView[2], currentView[3]);
+            if(!expandTimeout) {
+                expand();
+            }
         }
     })
+
+    //toggle mode between polar and cartesian when checkbox is changed
+    let mode = document.getElementById("mode");
+    mode.addEventListener("click", () => {
+        toggle_mode();
+        run(currentView[0], currentView[1], currentView[2], currentView[3]);
+        if(!mode.checked) {
+            //if in cartesian mode, begin expanding caches
+            if(!expandTimeout) {
+                expand();
+            }
+        }
+    });
 });

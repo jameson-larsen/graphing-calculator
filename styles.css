@@ -55,10 +55,17 @@ body {
     align-items:center;
     margin:0 2.5em;
 }
+#functions-container form div:first-child {
+    justify-content:center;
+}
 #functions-container form div label {
     font-size:1.25em;
     font-style:italic;
     margin-right:1em;
+}
+#functions-container form div:first-child label {
+    font-size:1em;
+    font-style:normal;
 }
 .function-input {
     height:1.75em;
@@ -74,6 +81,10 @@ body {
 .function-input.error:focus {
     outline:1px solid red;
 }
+#mode {
+    width:1.25em;
+    height:1.25em;
+}
 @media only screen and (max-width: 450px) {
     body {
         font-size:12px;
@@ -83,6 +94,13 @@ body {
     }
     #functions-container form div label {
         font-size:1.5em;
+    }
+    #functions-container form div:first-child label {
+        font-size:1.5em;
+    }
+    #mode {
+        width:1.5em;
+        height:1.5em;
     }
 }
 @media only screen and (max-width: 320px) {
